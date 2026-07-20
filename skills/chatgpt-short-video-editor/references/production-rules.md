@@ -13,8 +13,10 @@
 
 ## Visuals, captions, and sound
 
-- Apply approved grading per segment. Do not imply that an unrequested grade
-  is corrective or desired.
+- Per-segment extraction and processing are mandatory. Apply a colour grade or
+  HLG-to-Rec.709 correction only when technically required or explicitly
+  approved; inspect skin tones and the resulting image in the preview. Do not
+  imply that an unrequested grade is corrective or desired.
 - Make simple title and information cards as static Pillow assets. HyperFrames
   is optional and only follows an approved HTML, CSS, or GSAP animation plan.
 - Build `master.srt` using output-timeline offsets:
@@ -28,11 +30,14 @@
 2. Inspect the rendered preview at each cut boundary in a ±1.5s window for
    visual jumps, flashes, audio pops, sync, subtitle visibility, and overlay
    alignment. Also inspect first, last, and representative mid-point samples.
-3. Perform a full decode check and record observed duration, dimensions, audio,
-   and video streams. Check subtitle safe area, colour consistency, and mix.
+3. Perform a full decode check on the preview and record observed duration,
+   dimensions, audio, and video streams. Check subtitle safe area, colour
+   consistency, and mix.
 4. A failed check may trigger a self-fix only when the evidence identifies the
    problem. Limit this loop to three passes; then stop and report remaining
    issues instead of claiming success.
-5. After explicit preview approval and a passing final verification, output one
-   1080×1920 formal final. Do not claim a deliverable exists until that file has
-   been rendered and inspected.
+5. After explicit 720p preview approval, render one 1080×1920 formal final.
+   Then inspect that final file at its cut boundaries and samples, run a full
+   decode, and record its streams, duration, sync, subtitles, colour, and mix.
+   Deliver only when these final-file checks pass; do not claim a deliverable
+   exists until that file has been rendered and inspected.

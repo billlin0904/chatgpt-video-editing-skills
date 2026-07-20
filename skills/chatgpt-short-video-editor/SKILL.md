@@ -12,10 +12,11 @@ Skill starts only when a source file or clear source location is available.
 
 1. Inspect the source with `ffprobe`; never overwrite, move, rename, or delete
    it. Put every new artifact beside the source in `<source-directory>/edit/`.
-2. Check that the installed `video-use` workflow, `FFmpeg`, `ffprobe`, and a
-   word-level transcription path are available. Do not install, clone, update,
-   or repair anything silently. If a dependency is missing, hand off to
-   `chatgpt-video-editing-setup` and state what must be verified first.
+2. Check that the installed `video-use` workflow, `FFmpeg`, `ffprobe`, and
+   ElevenLabs Scribe v2 are available for the documented full-precision path.
+   Do not install, clone, update, or repair anything silently. If a dependency
+   is missing, hand off to `chatgpt-video-editing-setup` and state what must be
+   verified first.
 3. Before the first upload of a source file to ElevenLabs, name the file, say it
    is for ElevenLabs Scribe v2 transcription, mention possible quota or cost,
    and wait for explicit consent. Do not upload before that consent.
@@ -36,10 +37,10 @@ inside a word. Keep 30–200ms padding around cut edges, work per segment, and
 use output-timeline subtitle timing. Subtitles are the last visual operation.
 
 Render a complete 720p preview first. Inspect the rendered preview, not only
-the source; make no more than three evidence-based self-fix passes. Export a
-1080×1920 final only after the preview is approved and all QA evidence exists.
-Never say a transcript, preview, QA pass, or final is complete without the
-corresponding verified output.
+the source; make no more than three evidence-based self-fix passes. After the
+preview is approved, render the 1080×1920 final and verify that final file
+before delivery. Never say a transcript, preview, QA pass, or final is
+complete without the corresponding verified output.
 
 ## Handoff and delivery
 

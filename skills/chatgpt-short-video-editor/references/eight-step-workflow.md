@@ -12,11 +12,17 @@ vertical target. Create the adjacent `edit/` workspace only after this check.
 ## 2. 逐字轉寫
 
 Cache a word-level verbatim transcript under `edit/transcripts/`, keyed to the
-unchanged source. Before a first ElevenLabs upload, obtain the file-specific
-consent described in the Skill. ElevenLabs Scribe v2 is the preferred source
-for word-level timestamps; do not replace them with phrase-only subtitles.
-Another local word-level result needs its own timing verification and is not
-represented as having the same timing precision.
+unchanged source. ElevenLabs Scribe v2 is the default and required primary path
+for this documented full-precision workflow. Before a first upload, obtain the
+file-specific consent described in the Skill; do not replace timestamps with
+phrase-only subtitles.
+
+If Scribe is unavailable, hand off to setup first. If the user declines cloud
+upload or cannot use Scribe, do not silently switch: explain that a local
+Whisper fallback has lower-confidence timing, then ask whether the user
+explicitly wants it. When chosen, label its transcript lower-confidence and
+perform extra boundary playback checks at every EDL edge; never represent its
+timing as equal to Scribe.
 
 ## 3. 內容整理
 
@@ -34,8 +40,10 @@ animation, music, effects, CTA, or a publishing schedule.
 ## 5. 逐段粗剪
 
 After approval, build `edl.json` from word-aligned kept ranges. Extract and
-grade each kept range independently, apply boundary fades, then concatenate.
-Inspect ambiguous cuts with a source timeline view before committing them.
+process each kept range independently, apply boundary fades, then concatenate.
+Apply colour grading or HLG-to-Rec.709 correction only when technically
+required or explicitly approved; inspect skin tones in the preview. Inspect
+ambiguous cuts with a source timeline view before committing them.
 
 ## 6. 轉色／圖卡／字幕
 
@@ -52,6 +60,8 @@ showing it as ready for review.
 
 ## 8. QA 與正式定稿
 
-Record QA evidence, make at most three evidence-led corrections, and request
-preview confirmation. Only then render and verify one 1080×1920 formal final;
-retain the preview and all underlying artifacts.
+Record preview QA evidence, make at most three evidence-led corrections, and
+request preview confirmation. After explicit 720p preview approval, render one
+1080×1920 formal final, then inspect that final file and run its full decode.
+Deliver it only if those final-file checks pass; retain the preview and all
+underlying artifacts.
