@@ -7,19 +7,38 @@ Use `ELEVENLABS_API_KEY` only from the process environment or from
 transcript, command-line argument, public file, commit message, shell history,
 or log. Never print a key or a redacted-looking substitute.
 
-If the key is absent, say that setup cannot complete the credential check and
-ask the user to place their own key in the protected local file using an editor,
-or provide it through their environment outside the conversation. Then enforce:
+If the key is absent, say that setup cannot complete the credential check. Ask
+for approval to prepare local secret storage, then verify that `.env` is ignored
+*before* asking the user to write anything. Prefer an environment variable when
+that is practical. For an approved local file, first run:
 
 ```sh
-chmod 600 "$HOME/Developer/video-use/.env"
 git -C "$HOME/Developer/video-use" check-ignore -q .env
 ```
 
+If that fails, do not create the file or ask the user for a key. Prefer the
+environment-variable option, or, only after explicit approval, add the exact
+`.env` entry to the repository-local `.git/info/exclude` and check again:
+
+```sh
+exclude="$HOME/Developer/video-use/.git/info/exclude"
+grep -qxF '.env' "$exclude" || printf '%s\n' '.env' >> "$exclude"
+git -C "$HOME/Developer/video-use" check-ignore -q .env
+```
+
+This internal exclude change does not dirty the third-party repository. If the
+second ignore check fails, stop and use an environment variable instead. Only after ignore verification succeeds may the user write.
+They do so through an editor or secure terminal outside the conversation. The
+agent never reads file contents. After the user confirms the file exists,
+tighten and verify only its permission bits:
+
+```sh
+chmod 600 "$HOME/Developer/video-use/.env"
+test "$(stat -f '%Lp' "$HOME/Developer/video-use/.env")" = 600
+```
+
 Do not create a credential file until that mutation is included in the approval
-list. If `.env` is not ignored, stop before storing any credential and resolve
-the ignore rule safely. Do not use `cat`, `grep`, `env`, or similar output that
-could expose its contents.
+list. Do not use `cat`, `env`, or similar output that could expose its contents.
 
 ## Credential checks without paid transcription
 

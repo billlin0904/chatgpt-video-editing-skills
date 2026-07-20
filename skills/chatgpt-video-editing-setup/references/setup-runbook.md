@@ -12,6 +12,7 @@ Check both stable locations before acting:
 for repo in "$HOME/Developer/video-use" "$HOME/Developer/hyperframes"; do
   if [ -d "$repo/.git" ]; then
     git -C "$repo" remote -v
+    git -C "$repo" branch --show-current
     git -C "$repo" status --short
   fi
 done
@@ -54,15 +55,29 @@ that change and get approval before using it. Install FFmpeg only if `ffmpeg`
 and `ffprobe` are absent; it is required by the workflow. Optional online-source
 tools are separate and need their own approval.
 
-Register the **entire** repository with the active agent's Skills directory;
-for example, the official paths use a symlink such as:
+Register the **entire** repository with the active agent's Skills directory.
+After approval, preflight the exact destination before creating any link. For
+the Codex location, use the following pattern:
 
 ```sh
-ln -sfn "$HOME/Developer/video-use" "$HOME/.codex/skills/video-use"
+target="$HOME/Developer/video-use"
+destination="$HOME/.codex/skills/video-use"
+test -d "$(dirname "$destination")" || exit 1
+if [ -L "$destination" ]; then
+  readlink "$destination"
+  test "$(readlink "$destination")" = "$target" || exit 1
+elif [ -e "$destination" ]; then
+  exit 1
+else
+  ln -s "$target" "$destination"
+fi
 ```
 
+Report the `readlink` result for an existing symlink. Accept it only when it is
+the exact intended target; otherwise stop. If any real file or directory exists
+at the destination, stop. Create only a plain symlink at a confirmed absent
+destination after approval—never replace, nest, or retarget an existing link.
 Adapt the target to the current agent only after showing the exact link change.
-Do not replace an existing different target without explicit approval.
 
 ## 3. Install optional HyperFrames source and Skills
 
