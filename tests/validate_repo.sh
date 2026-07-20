@@ -28,15 +28,13 @@ require_file "examples/完整提示詞.md"
 require_file "assets/ChatGPT剪短影音的八大步驟.png"
 require_file "LICENSE"
 
-# Inspect every public text-like file. Internal specifications, plans, and
-# test/eval notes are excluded because they legitimately describe the negative
-# constraint. grep -I prevents binary assets from causing scan noise.
+# Inspect every public text-like file, including tests and evals. Only local
+# workflow artifacts are excluded. grep -I prevents binary assets from causing
+# scan noise.
 TEXT_FILES=$(find . \
   \( -path './.git' -o -path './.git/*' \
     -o -path './.superpowers' -o -path './.superpowers/*' \
-    -o -path './docs/superpowers' -o -path './docs/superpowers/*' \
-    -o -path './tests' -o -path './tests/*' \
-    -o -path './evals' -o -path './evals/*' \) -prune -o \
+    -o -path './docs/superpowers' -o -path './docs/superpowers/*' \) -prune -o \
   -type f -print | while IFS= read -r file; do
     if grep -I -F '' "$file" >/dev/null 2>&1; then
       printf '%s\n' "$file"
@@ -77,10 +75,10 @@ require_phrase "720p"
 require_phrase "1080×1920"
 require_phrase "QA"
 
-FORBIDDEN_DEPENDENCY='OpenMontage'
+FORBIDDEN_DEPENDENCY=$(printf '%s%s' 'Open' 'Montage')
 while IFS= read -r file; do
-  if grep -n -F "$FORBIDDEN_DEPENDENCY" "$file"; then
-    fail "forbidden dependency reference found in public package files: $FORBIDDEN_DEPENDENCY"
+  if grep -n -i -F "$FORBIDDEN_DEPENDENCY" "$file"; then
+    fail "forbidden dependency reference found in public package files"
   fi
 done <<EOF
 $TEXT_FILES

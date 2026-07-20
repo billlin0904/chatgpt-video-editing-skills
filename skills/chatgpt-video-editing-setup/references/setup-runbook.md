@@ -97,14 +97,30 @@ current upstream source uses `bun.lock`; if that changes, stop and follow the
 then-current project documentation after approval. A full LFS baseline or any
 large download requires separate explicit approval.
 
-Install the upstream Agent Skills with the current full-depth command:
+In an attended interactive terminal, open the full-depth picker:
 
 ```sh
 npx skills add heygen-com/hyperframes --full-depth
 ```
 
-This interactive command defaults to the Core Skills selection. Do not add
-`--all` unless the user explicitly approves installing every available skill.
+The picker opens with nothing selected. Explicitly tell the user to select the
+**Core Skills** group; that is the recommended set. Do not run this picker from
+an agent or other non-interactive environment because an unscoped
+non-interactive install can select all 19 Skills.
+
+For an agent or other non-interactive environment, install exactly the core set
+with the upstream CLI:
+
+```sh
+npx hyperframes skills update
+```
+
+Only after the user explicitly approves installing all 19 Skills may you run:
+
+```sh
+npx skills add heygen-com/hyperframes --all --full-depth
+```
+
 For any local `npx` verification on this machine, isolate npm's cache rather
 than changing cache ownership:
 
