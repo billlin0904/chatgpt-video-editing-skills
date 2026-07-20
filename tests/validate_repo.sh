@@ -28,11 +28,17 @@ require_file "examples/完整提示詞.md"
 require_file "assets/ChatGPT剪短影音的八大步驟.png"
 require_file "LICENSE"
 
-# Only package content is inspected below. Internal specifications, plans, and
-# test/eval notes may describe the prohibited dependency as a negative rule.
-TEXT_FILES=$(find skills examples -type f -print
-  for file in README.md LICENSE .gitignore THIRD_PARTY_NOTICE.md CONTRIBUTING.md CODE_OF_CONDUCT.md; do
-    if [ -f "$file" ]; then
+# Inspect every public text-like file. Internal specifications, plans, and
+# test/eval notes are excluded because they legitimately describe the negative
+# constraint. grep -I prevents binary assets from causing scan noise.
+TEXT_FILES=$(find . \
+  \( -path './.git' -o -path './.git/*' \
+    -o -path './.superpowers' -o -path './.superpowers/*' \
+    -o -path './docs/superpowers' -o -path './docs/superpowers/*' \
+    -o -path './tests' -o -path './tests/*' \
+    -o -path './evals' -o -path './evals/*' \) -prune -o \
+  -type f -print | while IFS= read -r file; do
+    if grep -I -F '' "$file" >/dev/null 2>&1; then
       printf '%s\n' "$file"
     fi
   done)

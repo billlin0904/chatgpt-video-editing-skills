@@ -50,3 +50,30 @@ exit status: 0
 
 - The repository is deliberately still RED because production Skills and public documentation are outside Task 1.
 - Later tasks must retain the explicit English `approval` wording somewhere in the public package, alongside the required security and editing phrases, for the deterministic contract check to pass.
+
+## Public-path scan fix evidence
+
+A temporary complete-package fixture was created outside the repository with all required files and phrases plus a public `assets/metadata.txt` containing a forbidden dependency reference.
+
+Before the fix, the fixture command below incorrectly passed because the validator only inspected an allowlist of `skills/`, `examples/`, and selected root files:
+
+```sh
+sh tests/validate_repo.sh
+```
+
+```text
+Repository contract checks passed.
+exit status: 0
+```
+
+The validator now traverses every public text-like file and explicitly prunes `.git`, `.superpowers`, `docs/superpowers`, `tests`, and `evals`. Binary files are ignored with `grep -I`.
+
+After the fix, the same fixture command failed at the intended public-path violation:
+
+```text
+1:OpenMontage
+ERROR: forbidden dependency reference found in public package files: OpenMontage
+exit status: 1
+```
+
+The temporary fixture was removed after the check. The current repository was then rechecked with `sh -n tests/validate_repo.sh`, `sh tests/validate_repo.sh` (expected RED: missing `README.md`, exit 1), and `python3 -m json.tool evals/evals.json >/dev/null` (exit 0).
