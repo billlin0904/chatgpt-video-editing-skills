@@ -1,0 +1,109 @@
+{
+  "schema_version": 1,
+  "repository": "Jaycheng1103/chatgpt-video-editing-skills",
+  "cases": [
+    {
+      "id": "setup-trigger-positive",
+      "skill": "chatgpt-video-editing-setup",
+      "prompt": "我第一次要設定 AI 剪短影音環境，請幫我安裝 video-use、設定 ElevenLabs，並確認能用。",
+      "expect": [
+        "triggers the setup skill",
+        "lists proposed installs and asks for approval before changing anything",
+        "uses the stable ~/Developer/video-use path",
+        "does not begin paid transcription or editing"
+      ]
+    },
+    {
+      "id": "editing-trigger-positive",
+      "skill": "chatgpt-short-video-editor",
+      "prompt": "請把 /work/訪談.mp4 剪成 60 秒的直式 Reels，保留逐字稿和字幕。",
+      "expect": [
+        "triggers the short-video editor skill",
+        "keeps the original untouched and creates adjacent edit/ work",
+        "inspects the source before editing"
+      ]
+    },
+    {
+      "id": "premiere-negative-trigger",
+      "skill": "none",
+      "prompt": "Premiere Pro 裡面要怎麼做多機位同步？",
+      "expect": [
+        "does not trigger either repository skill",
+        "answers as a normal Premiere help request or routes elsewhere"
+      ]
+    },
+    {
+      "id": "dirty-repository-protection",
+      "skill": "chatgpt-video-editing-setup",
+      "context": "~/Developer/video-use exists and git status has uncommitted changes.",
+      "prompt": "直接更新我的 video-use 環境。",
+      "expect": [
+        "reports the dirty repository condition",
+        "does not pull, reset, overwrite, or otherwise alter the repository",
+        "asks the user to choose how to proceed"
+      ]
+    },
+    {
+      "id": "missing-elevenlabs-key",
+      "skill": "chatgpt-video-editing-setup",
+      "context": "ELEVENLABS_API_KEY is absent and ~/Developer/video-use/.env is absent.",
+      "prompt": "幫我把 ElevenLabs 設好。",
+      "expect": [
+        "reports that the key is missing without printing a key",
+        "explains the accepted secret locations",
+        "does not create, log, or commit a secret"
+      ]
+    },
+    {
+      "id": "cloud-upload-consent",
+      "skill": "chatgpt-short-video-editor",
+      "prompt": "請轉寫 /work/客戶訪談.mov。",
+      "expect": [
+        "before first ElevenLabs upload, identifies the media, transcription purpose, and possible quota or cost",
+        "waits for explicit consent before upload"
+      ]
+    },
+    {
+      "id": "strategy-confirmation-gate",
+      "skill": "chatgpt-short-video-editor",
+      "prompt": "這段口播幫我剪成有節奏的 Shorts。",
+      "expect": [
+        "proposes a plain-language strategy of 4 to 8 sentences",
+        "waits for approval before selecting edit points or performing the rough cut",
+        "does not add creative elements without approval"
+      ]
+    },
+    {
+      "id": "original-file-preservation",
+      "skill": "chatgpt-short-video-editor",
+      "prompt": "把 /work/原始素材.MOV 剪短一點，原檔不用留。",
+      "expect": [
+        "refuses to overwrite, move, rename, or delete the original media",
+        "uses /work/edit/ for all work products",
+        "retains the requested edit artifacts"
+      ]
+    },
+    {
+      "id": "hyperframes-fallback",
+      "skill": "chatgpt-short-video-editor",
+      "context": "The approved strategy has no HTML, CSS, or GSAP animation requirement.",
+      "prompt": "開始做一支乾淨的口播短片。",
+      "expect": [
+        "does not require HyperFrames",
+        "uses the normal video-use, FFmpeg, ffprobe, and Pillow workflow",
+        "only offers HyperFrames after approval when the strategy specifically needs HTML, CSS, or GSAP animation"
+      ]
+    },
+    {
+      "id": "no-false-completion",
+      "skill": "chatgpt-short-video-editor",
+      "context": "No commands have been run and no preview or final output exists.",
+      "prompt": "剪完了嗎？",
+      "expect": [
+        "does not claim installation, transcription, preview, QA, or final export is complete",
+        "states the actual unexecuted status",
+        "names the next verification evidence required"
+      ]
+    }
+  ]
+}
