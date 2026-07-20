@@ -6,23 +6,96 @@ execution time because install instructions can change.
 
 ## 1. Inspect and propose
 
-Check both stable locations before acting:
+Use exact official HTTPS origins. Do not accept a fork, a similarly named
+repository, a missing `origin`, or another transport form, and never rewrite a
+remote automatically:
+
+- video-use: `https://github.com/browser-use/video-use.git`
+- HyperFrames: `https://github.com/heygen-com/hyperframes.git`
+
+Check the required video-use location before acting. Check HyperFrames only if
+the user explicitly requested or approved it. Do not inspect only for a `.git`
+directory: in a linked worktree, `.git` is a file. The following preflight
+recognizes both normal checkouts and linked worktrees, and rejects any existing
+path that is not the expected clean repository:
 
 ```sh
-for repo in "$HOME/Developer/video-use" "$HOME/Developer/hyperframes"; do
-  if [ -d "$repo/.git" ]; then
-    git -C "$repo" remote -v
-    git -C "$repo" branch --show-current
-    git -C "$repo" status --short
+inspect_repo() {
+  repo=$1
+  expected_origin=$2
+
+  if [ ! -e "$repo" ] && [ ! -L "$repo" ]; then
+    printf '%s\n' "missing repository: $repo"
+    return 2
   fi
-done
-command -v git uv ffmpeg ffprobe python3 node npm bun
+
+  inside=$(git -C "$repo" rev-parse --is-inside-work-tree 2>/dev/null) || {
+    printf '%s\n' "STOP: existing path is not a Git worktree: $repo" >&2
+    return 1
+  }
+  [ "$inside" = true ] || {
+    printf '%s\n' "STOP: existing path is not inside a Git worktree: $repo" >&2
+    return 1
+  }
+
+  commit=$(git -C "$repo" rev-parse --verify HEAD) || return 1
+  branch=$(git -C "$repo" branch --show-current) || return 1
+  [ -n "$branch" ] || branch="(detached at $commit)"
+  actual_origin=$(git -C "$repo" remote get-url origin) || {
+    printf '%s\n' "STOP: origin is missing: $repo" >&2
+    return 1
+  }
+  [ "$actual_origin" = "$expected_origin" ] || {
+    printf '%s\n' "STOP: unexpected origin for $repo: $actual_origin" >&2
+    return 1
+  }
+  status=$(git -C "$repo" status --short) || return 1
+  printf '%s\n' "repo=$repo" "origin=$actual_origin" \
+    "branch=$branch" "commit=$commit" "status=${status:-clean}"
+  [ -z "$status" ] || {
+    printf '%s\n' "STOP: repository is dirty: $repo" >&2
+    return 1
+  }
+}
+
+video_use_origin=https://github.com/browser-use/video-use.git
+inspect_repo "$HOME/Developer/video-use" "$video_use_origin" || {
+  result=$?
+  [ "$result" -eq 2 ] || exit 1
+}
+command -v git uv ffmpeg ffprobe python3
 ```
 
-For every existing repository, record its remote and branch. A non-empty
-`git status --short` is a hard stop: do not pull, reset, reclone, modify, or
-install into that repository. Explain what was found and ask the user to clean
-it up or choose a separate, explicitly approved repair action.
+The `2` result means the expected path is absent and may be proposed for an
+approved clone. Every other failure is a hard stop. In particular, an existing
+non-repository path, missing or mismatched origin, invalid commit, or non-empty
+status must stop the workflow before pull, reset, reclone, dependency install,
+or Skill registration. Report the evidence and ask the user to resolve it or
+choose a separate safe action. A clean fork is still the wrong repository.
+
+When HyperFrames is requested, also require a real Node.js major-version check
+before proposing any HyperFrames mutation:
+
+```sh
+command -v node npm npx bun
+node_major=$(node -p 'process.versions.node.split(".")[0]') || exit 1
+case "$node_major" in *[!0-9]*|'') exit 1 ;; esac
+[ "$node_major" -ge 22 ] || {
+  printf '%s\n' "STOP: HyperFrames requires Node.js 22 or newer; found major $node_major" >&2
+  exit 1
+}
+
+hyperframes_origin=https://github.com/heygen-com/hyperframes.git
+inspect_repo "$HOME/Developer/hyperframes" "$hyperframes_origin" || {
+  result=$?
+  [ "$result" -eq 2 ] || exit 1
+}
+```
+
+If Node is older than 22, stop and propose an isolated version-manager setup as
+a separate approval item. Do not replace or change the system Node.js without
+approval. If HyperFrames was not requested, do not run its Node or repository
+checks; report `HyperFrames 未要求`.
 
 Before mutation, show an approval checklist tailored to what is missing:
 
@@ -33,7 +106,10 @@ Before mutation, show an approval checklist tailored to what is missing:
 - create or tighten the credential file.
 
 Wait for a clear approval that covers the proposed changes. Do not treat a
-request to “set it up” as approval after discovery reveals extra changes.
+request to “set it up” as approval after discovery reveals extra changes. Git
+state can drift while approval is pending, so rerun the applicable `inspect_repo`
+preflight immediately before every dependency installation and Skill
+registration. Stop if origin, branch/commit validity, or cleanliness changed.
 
 ## 2. Install or repair video-use
 
@@ -45,6 +121,7 @@ For a missing, approved checkout:
 
 ```sh
 git clone https://github.com/browser-use/video-use.git "$HOME/Developer/video-use"
+inspect_repo "$HOME/Developer/video-use" "https://github.com/browser-use/video-use.git"
 cd "$HOME/Developer/video-use"
 uv sync
 ```
@@ -56,8 +133,8 @@ and `ffprobe` are absent; it is required by the workflow. Optional online-source
 tools are separate and need their own approval.
 
 Register the **entire** repository with the active agent's Skills directory.
-After approval, preflight the exact destination before creating any link. For
-the Codex location, use the following pattern:
+After approval, rerun `inspect_repo` and preflight the exact destination before
+creating any link. For the Codex location, use the following pattern:
 
 ```sh
 target="$HOME/Developer/video-use"
@@ -87,7 +164,11 @@ Use `https://github.com/heygen-com/hyperframes.git` at
 baselines are not downloaded:
 
 ```sh
+node_major=$(node -p 'process.versions.node.split(".")[0]') || exit 1
+case "$node_major" in *[!0-9]*|'') exit 1 ;; esac
+[ "$node_major" -ge 22 ] || exit 1
 GIT_LFS_SKIP_SMUDGE=1 git clone https://github.com/heygen-com/hyperframes.git "$HOME/Developer/hyperframes"
+inspect_repo "$HOME/Developer/hyperframes" "https://github.com/heygen-com/hyperframes.git"
 cd "$HOME/Developer/hyperframes"
 bun install --frozen-lockfile
 ```
@@ -115,6 +196,10 @@ with the upstream CLI:
 npx hyperframes skills update
 ```
 
+Rerun `inspect_repo` immediately before either Skills command. The Node.js 22+
+check also applies before `bun install`, `npx`, or any HyperFrames Skill
+registration.
+
 Only after the user explicitly approves installing all 19 Skills may you run:
 
 ```sh
@@ -130,15 +215,36 @@ npm_config_cache=/private/tmp/hyperframes-npx-cache npx --yes hyperframes --help
 
 ## 4. Local, no-cost verification
 
-After approved changes, verify only local state:
+After approved changes, verify the required video-use state locally:
 
 ```sh
-git -C "$HOME/Developer/video-use" remote get-url origin
+inspect_repo "$HOME/Developer/video-use" "https://github.com/browser-use/video-use.git"
 test -d "$HOME/Developer/video-use/helpers"
 command -v ffmpeg ffprobe
-git -C "$HOME/Developer/hyperframes" remote get-url origin
-test -f "$HOME/Developer/hyperframes/bun.lock"
 ```
+
+Run the optional checks only when HyperFrames was explicitly approved **and**
+installed in this setup:
+
+```sh
+if [ "$hyperframes_approved" = yes ] && [ "$hyperframes_installed" = yes ]; then
+  inspect_repo "$HOME/Developer/hyperframes" "https://github.com/heygen-com/hyperframes.git"
+  node_major=$(node -p 'process.versions.node.split(".")[0]') || exit 1
+  case "$node_major" in *[!0-9]*|'') exit 1 ;; esac
+  [ "$node_major" -ge 22 ] || exit 1
+  test -f "$HOME/Developer/hyperframes/bun.lock"
+  npx skills list
+else
+  printf '%s\n' 'HyperFrames 未要求；未執行 Repo、Node、bun.lock 或 Core Skills 檢查。'
+fi
+```
+
+Set the two gate values from this setup session's explicit approval record and
+observed install result; do not infer them merely because a path exists. A
+skipped optional check is “not requested,” not a setup failure. Compare the
+active agent's listed Skills with the exact Core Skills outcome recorded by the
+approved `npx hyperframes skills update`; do not rerun an installer merely to
+verify it.
 
 Then use the checks in [security and verification](security-and-verification.md).
 Do not pass media to any API, invoke transcription, create `edit/`, render, or

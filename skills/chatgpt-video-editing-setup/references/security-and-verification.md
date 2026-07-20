@@ -18,23 +18,55 @@ git -C "$HOME/Developer/video-use" check-ignore -q .env
 
 If that fails, do not create the file or ask the user for a key. Prefer the
 environment-variable option, or, only after explicit approval, add the exact
-`.env` entry to the repository-local `.git/info/exclude` and check again:
+`.env` entry to the repository-local exclude file. Resolve that file through
+Git so this also works in linked worktrees; never guess `$repo/.git/...`:
 
 ```sh
-exclude="$HOME/Developer/video-use/.git/info/exclude"
+repo="$HOME/Developer/video-use"
+exclude=$(git -C "$repo" rev-parse --path-format=absolute --git-path info/exclude) || {
+  printf '%s\n' 'STOP: Git cannot resolve the repository-local exclude path; use an environment variable.' >&2
+  exit 1
+}
+case "$exclude" in /*) ;; *) exit 1 ;; esac
+[ -f "$exclude" ] && [ ! -L "$exclude" ] || {
+  printf '%s\n' 'STOP: exclude path is not a verifiable regular file; use an environment variable.' >&2
+  exit 1
+}
 grep -qxF '.env' "$exclude" || printf '%s\n' '.env' >> "$exclude"
-git -C "$HOME/Developer/video-use" check-ignore -q .env
+git -C "$repo" check-ignore -q .env
 ```
 
-This internal exclude change does not dirty the third-party repository. If the
-second ignore check fails, stop and use an environment variable instead. Only after ignore verification succeeds may the user write.
+If `--path-format=absolute` is unsupported, the result is not absolute, or the
+resolved path cannot be verified as a regular non-symlink file, stop and use an
+environment variable instead of guessing a path. This internal exclude change
+does not dirty the third-party repository. If the second ignore check fails,
+stop and use an environment variable instead. Only after ignore verification
+succeeds may the user write.
 They do so through an editor or secure terminal outside the conversation. The
 agent never reads file contents. After the user confirms the file exists,
-tighten and verify only its permission bits:
+tighten and verify only its permission bits. Reject a symlink, directory, or
+other non-regular path before `chmod`, then select the platform's `stat`
+syntax without reading the file:
 
 ```sh
-chmod 600 "$HOME/Developer/video-use/.env"
-test "$(stat -f '%Lp' "$HOME/Developer/video-use/.env")" = 600
+env_file="$HOME/Developer/video-use/.env"
+[ -f "$env_file" ] && [ ! -L "$env_file" ] || {
+  printf '%s\n' 'STOP: .env must be a regular file and not a symlink.' >&2
+  exit 1
+}
+chmod 600 "$env_file"
+case "$(uname -s)" in
+  Darwin) mode=$(stat -f '%Lp' "$env_file") ;;
+  Linux) mode=$(stat -c '%a' "$env_file") ;;
+  *)
+    printf '%s\n' 'STOP: unsupported platform; .env mode was not verified.' >&2
+    exit 1
+    ;;
+esac
+[ "$mode" = 600 ] || {
+  printf '%s\n' 'STOP: .env permissions are not 600.' >&2
+  exit 1
+}
 ```
 
 Do not create a credential file until that mutation is included in the approval
@@ -63,9 +95,12 @@ Report observations, not assumptions:
 | runtime | paths or versions for Python/uv, FFmpeg, and ffprobe |
 | video-use registration | agent Skills path and symlink target, if one was approved |
 | credential | source present and `.env` mode/ignore check, without value |
-| HyperFrames, if approved | stable path, origin URL, clean status, lockfile, installed Skills outcome |
+| HyperFrames, if explicitly approved and installed | stable path, exact official origin URL, clean status, Node.js 22+, lockfile, installed Core Skills outcome |
 | no-cost boundary | confirmation that no media was uploaded, transcribed, edited, previewed, or rendered |
 
 If a check fails, report it as incomplete with the next proposed mutation; do
 not call the environment “ready.” Do not alter original media in setup. The
 later editing workflow keeps new artifacts adjacent to its source under `edit/`.
+If HyperFrames was not explicitly approved and installed, skip all of its Repo,
+Node, `bun.lock`, and Core Skills checks and report “HyperFrames 未要求”; that is
+not a setup failure.

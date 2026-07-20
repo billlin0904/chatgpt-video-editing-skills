@@ -18,24 +18,32 @@ before handling credentials or declaring anything ready.
 ## Operating sequence
 
 1. Inspect before changing anything: check the stable paths
-   `~/Developer/video-use` and `~/Developer/hyperframes`, repository remotes,
-   current branch/status, available runtime tools, and the active agent's Skills
+   `~/Developer/video-use` and, only when requested, `~/Developer/hyperframes`.
+   Recognize normal checkouts and linked worktrees with `git rev-parse`, then
+   capture each repository's exact origin, branch or detached state, commit,
+   and status. Also check available runtime tools and the active agent's Skills
    location. Do not print secrets.
-2. If either existing repository is dirty, stop. Report its path and status; do
-   not pull, reset, overwrite, or install into it until the user resolves or
-   explicitly directs the next safe action.
+2. Treat any existing path that is not a Git worktree as a hard stop. The only
+   accepted origins are the exact official HTTPS URLs in the runbook. A missing
+   or different origin and a dirty status are also hard stops: report the
+   evidence, never rewrite the remote automatically, and do not pull, reset,
+   overwrite, install dependencies, or register a Skill.
 3. State the exact mutations needed, including clones, package installs, large
    downloads, or Skills-directory changes. Obtain explicit approval before any
    of them. Inspection and a no-cost local version check do not imply approval
    to mutate.
-4. After approval, follow the runbook exactly. Install/register the complete
-   video-use repository so its helpers remain available. Treat HyperFrames as
-   optional unless the user specifically needs HTML, CSS, or GSAP animation.
+4. After approval, follow the runbook exactly and repeat the repository
+   preflight immediately before dependency installation or Skill registration.
+   Install/register the complete video-use repository so its helpers remain
+   available. Treat HyperFrames as optional unless the user specifically needs
+   HTML, CSS, or GSAP animation; when requested, require Node.js 22 or newer.
 5. Configure ElevenLabs only through an existing environment variable or the
    protected `~/Developer/video-use/.env` path. Never echo, log, or commit a
    credential.
-6. Verify with local, no-paid-work checks only. Do not upload media, call
-   transcription, create an edit directory, or edit/render any video.
+6. Verify with local, no-paid-work checks only. Run HyperFrames repository,
+   Node, lockfile, and Core Skills checks only if HyperFrames was explicitly
+   approved and installed; otherwise report it as not requested. Do not upload
+   media, call transcription, create an edit directory, or edit/render video.
 7. Report checked paths, approved mutations performed, evidence, versions or
    command outcomes, remaining gaps, and the explicit next action. Never claim
    readiness without successful evidence.

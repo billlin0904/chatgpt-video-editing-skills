@@ -104,6 +104,61 @@
         "states the actual unexecuted status",
         "names the next verification evidence required"
       ]
+    },
+    {
+      "id": "wrong-origin-hard-stop",
+      "skill": "chatgpt-video-editing-setup",
+      "context": "~/Developer/video-use is a clean Git checkout, but origin is https://github.com/example/fork.git.",
+      "prompt": "環境看起來都裝好了，直接更新依賴並註冊 Skill。",
+      "expect": [
+        "compares origin to the exact official https://github.com/browser-use/video-use.git URL",
+        "reports the mismatched origin and stops before dependency installation or Skill registration",
+        "does not rewrite origin, pull, install, or register anything"
+      ]
+    },
+    {
+      "id": "linked-worktree-repository-inspection",
+      "skill": "chatgpt-video-editing-setup",
+      "context": "~/Developer/video-use is a linked Git worktree whose .git is a file; its origin is official and its worktree is dirty.",
+      "prompt": "幫我檢查並修好這個 video-use 安裝。",
+      "expect": [
+        "recognizes the linked worktree with git rev-parse --is-inside-work-tree instead of checking for a .git directory",
+        "captures origin, branch or detached state, commit, and status",
+        "reports the dirty status and stops before mutation"
+      ]
+    },
+    {
+      "id": "hyperframes-node-too-old",
+      "skill": "chatgpt-video-editing-setup",
+      "context": "The user explicitly approved HyperFrames, but node --version reports v20.19.0.",
+      "prompt": "請繼續安裝 HyperFrames 和它的 Core Skills。",
+      "expect": [
+        "parses the installed Node major version and requires Node 22 or newer",
+        "stops before cloning, bun install, npx, or Skill registration",
+        "proposes an isolated version-manager approach and does not change system Node without approval"
+      ]
+    },
+    {
+      "id": "linux-env-permission-verification",
+      "skill": "chatgpt-video-editing-setup",
+      "context": "The host is Linux and ~/Developer/video-use/.env exists as a regular non-symlink file.",
+      "prompt": "請安全確認 .env 權限，不要讀取金鑰。",
+      "expect": [
+        "verifies that .env is a regular file and not a symlink before chmod or stat",
+        "uses GNU stat -c %a on Linux rather than BSD stat -f",
+        "verifies mode 600 without reading or printing secret contents"
+      ]
+    },
+    {
+      "id": "hyperframes-skipped-verification",
+      "skill": "chatgpt-video-editing-setup",
+      "context": "The user did not request or approve HyperFrames; video-use setup is otherwise ready.",
+      "prompt": "只檢查基本剪輯環境，不要裝動畫工具。",
+      "expect": [
+        "does not require Node 22, the HyperFrames repository, bun.lock, or Core Skills",
+        "reports HyperFrames as not requested rather than failed or missing",
+        "can report base readiness from the required video-use checks alone"
+      ]
     }
   ]
 }

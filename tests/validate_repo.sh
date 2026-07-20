@@ -58,6 +58,21 @@ require_phrase() {
   has_phrase "$phrase" || fail "missing required contract phrase: $phrase"
 }
 
+require_file_phrase() {
+  file=$1
+  phrase=$2
+  grep -F "$phrase" "$file" >/dev/null 2>&1 ||
+    fail "missing required contract phrase in $file: $phrase"
+}
+
+reject_file_phrase() {
+  file=$1
+  phrase=$2
+  if grep -F "$phrase" "$file" >/dev/null 2>&1; then
+    fail "forbidden legacy contract phrase in $file: $phrase"
+  fi
+}
+
 require_phrase "ELEVENLABS_API_KEY"
 require_phrase "~/Developer/video-use/.env"
 require_phrase "edit/"
@@ -74,6 +89,51 @@ require_phrase "30ms"
 require_phrase "720p"
 require_phrase "1080×1920"
 require_phrase "QA"
+
+# Setup safety regressions: these exact public contracts must remain visible in
+# the executable runbook and user-facing prompt instead of being implied by
+# generic prose.
+SETUP_RUNBOOK="skills/chatgpt-video-editing-setup/references/setup-runbook.md"
+SECURITY_RUNBOOK="skills/chatgpt-video-editing-setup/references/security-and-verification.md"
+FULL_PROMPT="examples/完整提示詞.md"
+EVALS="evals/evals.json"
+
+for eval_id in \
+  wrong-origin-hard-stop \
+  linked-worktree-repository-inspection \
+  hyperframes-node-too-old \
+  linux-env-permission-verification \
+  hyperframes-skipped-verification; do
+  require_file_phrase "$EVALS" "\"id\": \"$eval_id\""
+done
+
+for file in "$SETUP_RUNBOOK" "$FULL_PROMPT"; do
+  require_file_phrase "$file" 'git -C "$repo" rev-parse --is-inside-work-tree'
+  require_file_phrase "$file" 'git -C "$repo" rev-parse --verify HEAD'
+  require_file_phrase "$file" 'git -C "$repo" remote get-url origin'
+  require_file_phrase "$file" 'https://github.com/browser-use/video-use.git'
+  require_file_phrase "$file" 'https://github.com/heygen-com/hyperframes.git'
+  require_file_phrase "$file" '[ "$actual_origin" = "$expected_origin" ] ||'
+  require_file_phrase "$file" 'node_major=$(node -p'
+  require_file_phrase "$file" '[ "$node_major" -ge 22 ] ||'
+done
+
+require_file_phrase "$SETUP_RUNBOOK" 'HyperFrames 未要求'
+require_file_phrase "$SETUP_RUNBOOK" 'if [ "$hyperframes_approved" = yes ] && [ "$hyperframes_installed" = yes ]; then'
+require_file_phrase "$FULL_PROMPT" 'HyperFrames 未要求'
+require_file_phrase "README.md" 'Node.js 22 或更新版本'
+
+reject_file_phrase "$SETUP_RUNBOOK" '[ -d "$repo/.git" ]'
+reject_file_phrase "$FULL_PROMPT" '[ -d "$repo/.git" ]'
+reject_file_phrase "$SECURITY_RUNBOOK" 'exclude="$HOME/Developer/video-use/.git/info/exclude"'
+reject_file_phrase "$FULL_PROMPT" 'exclude="$HOME/Developer/video-use/.git/info/exclude"'
+
+for file in "$SECURITY_RUNBOOK" "$FULL_PROMPT"; do
+  require_file_phrase "$file" 'git -C "$repo" rev-parse --path-format=absolute --git-path info/exclude'
+  require_file_phrase "$file" '[ -f "$env_file" ] && [ ! -L "$env_file" ]'
+  require_file_phrase "$file" "Darwin) mode=\$(stat -f '%Lp' \"\$env_file\") ;;"
+  require_file_phrase "$file" "Linux) mode=\$(stat -c '%a' \"\$env_file\") ;;"
+done
 
 FORBIDDEN_DEPENDENCY=$(printf '%s%s' 'Open' 'Montage')
 while IFS= read -r file; do

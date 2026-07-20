@@ -81,7 +81,7 @@ npx skills remove chatgpt-video-editing-setup chatgpt-short-video-editor
 - [video-use](https://github.com/browser-use/video-use) 完整 Repo；剪輯輔助程式位於其中，不能只保留一份 Skill 文件。
 - [ElevenLabs Scribe v2](https://elevenlabs.io/docs/capabilities/speech-to-text) 憑證與可用額度，供完整精度流程取得 word-level 時間碼。
 - [Pillow](https://python-pillow.github.io/) 用於簡單靜態資訊卡。
-- [HyperFrames](https://github.com/heygen-com/hyperframes) 僅在已核准的策略需要 HTML、CSS 或 GSAP 動畫時才是選用需求；其環境通常還需要 Node.js 與 Bun。
+- [HyperFrames](https://github.com/heygen-com/hyperframes) 僅在已核准的策略需要 HTML、CSS 或 GSAP 動畫時才是選用需求；若選用，必須有 Node.js 22 或更新版本與 Bun。未選用時，不要求 Node.js、HyperFrames Repo、`bun.lock` 或其 Core Skills。
 
 缺少工具時，剪輯 Skill 會停在安全位置，說明缺口並交給 Setup Skill 檢查。它不會自行 Clone、更新、安裝套件或改動你的 Skills 目錄。
 
