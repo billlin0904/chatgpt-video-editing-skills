@@ -73,6 +73,28 @@ status must stop the workflow before pull, reset, reclone, dependency install,
 or Skill registration. Report the evidence and ask the user to resolve it or
 choose a separate safe action. A clean fork is still the wrong repository.
 
+Also inspect the subtitle font state so a missing font can be proposed as its
+own approval item; the check itself mutates nothing:
+
+```sh
+case "$(uname -s)" in
+  Darwin) font_dir="$HOME/Library/Fonts" ;;
+  Linux) font_dir="$HOME/.local/share/fonts" ;;
+  *) printf '%s\n' 'STOP: unsupported platform; the subtitle font was not checked.' >&2; exit 1 ;;
+esac
+for weight in Regular Bold; do
+  font_file="$font_dir/SourceHanSansTW-$weight.otf"
+  if [ -f "$font_file" ] && [ ! -L "$font_file" ]; then
+    printf '%s\n' "font present: $font_file"
+  else
+    printf '%s\n' "font missing: $font_file"
+  fi
+done
+if command -v fc-list >/dev/null 2>&1; then
+  fc-list | grep -i "Source Han Sans TW" || printf '%s\n' 'fontconfig does not list Source Han Sans TW'
+fi
+```
+
 When HyperFrames is requested, also require a real Node.js major-version check
 before proposing any HyperFrames mutation:
 
@@ -101,6 +123,7 @@ Before mutation, show an approval checklist tailored to what is missing:
 
 - clone or update the source repositories;
 - install Python, Node, FFmpeg, or package dependencies;
+- download and install the Source Han Sans TW subtitle font files;
 - download a large dependency or full media baseline;
 - create/change a symlink or register an agent Skill;
 - create or tighten the credential file.
@@ -156,7 +179,68 @@ at the destination, stop. Create only a plain symlink at a confirmed absent
 destination after approval—never replace, nest, or retarget an existing link.
 Adapt the target to the current agent only after showing the exact link change.
 
-## 3. Install optional HyperFrames source and Skills
+## 3. Install the subtitle font (Source Han Sans TW)
+
+Burned-in Traditional Chinese subtitles need a CJK font, or the render falls
+back to an unsuitable system font or missing-glyph boxes. The workflow default
+is Source Han Sans TW（思源黑體）, released by Adobe under the SIL Open Font
+License 1.1. The only accepted source is the official repository's `release`
+branch at `https://github.com/adobe-fonts/source-han-sans`. Do not download the
+font from mirrors, aggregator sites, or similarly named repositories, and do
+not substitute another font silently.
+
+If the inspection above already found both weights as regular files, report
+them as present and skip this section; never re-download or overwrite an
+existing font file. If a font path exists but is a symlink, directory, or other
+non-regular file, stop and report it instead of replacing it.
+
+For missing weights, list the download as an approval item (about 6 MB per
+weight, two weights by default). After approval:
+
+```sh
+font_source=https://github.com/adobe-fonts/source-han-sans/raw/release/SubsetOTF/TW
+mkdir -p "$font_dir"
+for weight in Regular Bold; do
+  font_file="$font_dir/SourceHanSansTW-$weight.otf"
+  if [ -e "$font_file" ] || [ -L "$font_file" ]; then
+    printf '%s\n' "skip existing path: $font_file"
+    continue
+  fi
+  curl -fL --proto '=https' -o "$font_file" \
+    "$font_source/SourceHanSansTW-$weight.otf"
+done
+if [ "$(uname -s)" = Linux ]; then
+  command -v fc-cache >/dev/null 2>&1 && fc-cache -f "$font_dir"
+fi
+```
+
+Verify each installed file is a real OpenType/CFF font before reporting it as
+installed; `SourceHanSansTW-Regular.otf` and `SourceHanSansTW-Bold.otf` must
+both start with the `OTTO` magic bytes:
+
+```sh
+for weight in Regular Bold; do
+  font_file="$font_dir/SourceHanSansTW-$weight.otf"
+  [ -f "$font_file" ] && [ ! -L "$font_file" ] || {
+    printf '%s\n' "STOP: subtitle font is not a regular file: $font_file" >&2
+    exit 1
+  }
+  magic=$(head -c 4 "$font_file" | od -An -tx1 | tr -d ' \n') || exit 1
+  [ "$magic" = 4f54544f ] || {
+    printf '%s\n' "STOP: not a valid OpenType font: $font_file" >&2
+    exit 1
+  }
+done
+```
+
+If a download fails or verification stops, delete nothing automatically; report
+the exact path and evidence, and wait for the user's decision. If the user
+wants different weights, another regional subset, the Super OTC, or a variable
+font, treat that as a separate approval item and follow the official
+`SourceHanSansReadMe.pdf` in the upstream repository for the configuration
+choice.
+
+## 4. Install optional HyperFrames source and Skills
 
 Only offer this when the user needs HTML/CSS/GSAP animation or asks for it.
 Use `https://github.com/heygen-com/hyperframes.git` at
@@ -213,7 +297,7 @@ than changing cache ownership:
 npm_config_cache=/private/tmp/hyperframes-npx-cache npx --yes hyperframes --help
 ```
 
-## 4. Local, no-cost verification
+## 5. Local, no-cost verification
 
 After approved changes, verify the required video-use state locally:
 
@@ -221,6 +305,18 @@ After approved changes, verify the required video-use state locally:
 inspect_repo "$HOME/Developer/video-use" "https://github.com/browser-use/video-use.git"
 test -d "$HOME/Developer/video-use/helpers"
 command -v ffmpeg ffprobe
+```
+
+Also verify the subtitle font, reusing `font_dir` from the platform check:
+
+```sh
+for weight in Regular Bold; do
+  font_file="$font_dir/SourceHanSansTW-$weight.otf"
+  [ -f "$font_file" ] && [ ! -L "$font_file" ] || exit 1
+done
+if command -v fc-list >/dev/null 2>&1; then
+  fc-list | grep -i "Source Han Sans TW"
+fi
 ```
 
 Run the optional checks only when HyperFrames was explicitly approved **and**

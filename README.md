@@ -10,7 +10,7 @@
 
 | Skill | 用途 | 不會做的事 |
 | --- | --- | --- |
-| [`chatgpt-video-editing-setup`](skills/chatgpt-video-editing-setup/SKILL.md) | 檢查、安裝、修復或驗證 video-use、FFmpeg、ffprobe、ElevenLabs 憑證與選用的 HyperFrames 環境 | 不上傳素材、不轉寫、不剪輯、不輸出影片 |
+| [`chatgpt-video-editing-setup`](skills/chatgpt-video-editing-setup/SKILL.md) | 檢查、安裝、修復或驗證 video-use、FFmpeg、ffprobe、思源黑體 TW 字幕字體、ElevenLabs 憑證與選用的 HyperFrames 環境 | 不上傳素材、不轉寫、不剪輯、不輸出影片 |
 | [`chatgpt-short-video-editor`](skills/chatgpt-short-video-editor/SKILL.md) | 對使用者提供的影片執行逐字轉寫、剪輯策略、粗剪、字幕、預覽、QA 與正式輸出 | 不會靜默安裝工具，也不會在預覽核准前輸出正式定稿 |
 
 ## 安裝
@@ -79,6 +79,7 @@ npx skills remove chatgpt-video-editing-setup chatgpt-short-video-editor
 - Git、Python 與 [uv](https://docs.astral.sh/uv/)；實際需求仍以 video-use 當下版本的官方文件為準。
 - [FFmpeg](https://ffmpeg.org/) 與 `ffprobe`。
 - [video-use](https://github.com/browser-use/video-use) 完整 Repo；剪輯輔助程式位於其中，不能只保留一份 Skill 文件。
+- [思源黑體（Source Han Sans）](https://github.com/adobe-fonts/source-han-sans) TW 子集 OTF（Regular 與 Bold），供繁體中文字幕燒錄使用；採 SIL Open Font License 1.1 授權，Setup Skill 只從官方 Repo 的 `release` 分支下載。
 - [ElevenLabs Scribe v2](https://elevenlabs.io/docs/capabilities/speech-to-text) 憑證與可用額度，供完整精度流程取得 word-level 時間碼。
 - [Pillow](https://python-pillow.github.io/) 用於簡單靜態資訊卡。
 - [HyperFrames](https://github.com/heygen-com/hyperframes) 僅在已核准的策略需要 HTML、CSS 或 GSAP 動畫時才是選用需求；若選用，必須有 Node.js 22 或更新版本與 Bun。未選用時，不要求 Node.js、HyperFrames Repo、`bun.lock` 或其 Core Skills。
@@ -104,7 +105,7 @@ npx skills remove chatgpt-video-editing-setup chatgpt-short-video-editor
 3. 內容整理：找出 Hook、核心主線、可刪內容與待確認資訊。
 4. 剪輯決策：先提出 4–8 句白話策略，取得核准後才決定剪接點與創意元素。
 5. 逐段粗剪：依完整字詞邊界建立 EDL，保留 30–200ms 邊界空間與約 30ms 音訊淡入淡出。
-6. 轉色／圖卡／字幕：只有技術上必要或已核准時才調色；靜態圖卡用 Pillow，選用動畫才用 HyperFrames，字幕最後合成。
+6. 轉色／圖卡／字幕：只有技術上必要或已核准時才調色；靜態圖卡用 Pillow，選用動畫才用 HyperFrames，字幕以思源黑體 TW 最後合成。
 7. 混音與完整預覽：先輸出並檢查一支完整 720p 預覽。
 8. QA 與正式定稿：預覽獲得明確核准後才輸出 1080×1920 正式檔；正式檔仍需獨立檢查與完整解碼，通過後才交付。
 
@@ -142,9 +143,9 @@ edit/
 
 ## 常見問題
 
-### Agent 說找不到 FFmpeg、ffprobe、video-use 或憑證
+### Agent 說找不到 FFmpeg、ffprobe、video-use、字幕字體或憑證
 
-請改用 `chatgpt-video-editing-setup`。它會先檢查，再列出需要你核准的變更。若既有 Repo 有未提交修改，它會停下來，不會直接 pull、reset 或覆寫。
+請改用 `chatgpt-video-editing-setup`。它會先檢查，再列出需要你核准的變更。若既有 Repo 有未提交修改，它會停下來，不會直接 pull、reset 或覆寫；既有字體檔也不會被重新下載或覆寫。
 
 ### 沒有 ElevenLabs 額度，或不想上傳素材
 
@@ -164,4 +165,4 @@ edit/
 
 本專案以 [MIT License](LICENSE) 發布。歡迎先閱讀 [`CONTRIBUTING.md`](CONTRIBUTING.md) 與 [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) 再參與貢獻。
 
-這是社群維護的非官方專案，與 OpenAI、ChatGPT、video-use、HyperFrames、ElevenLabs、FFmpeg 或 Pillow 的開發者及所屬公司沒有從屬、授權、背書或合作關係。產品名稱與商標屬各自權利人所有。
+這是社群維護的非官方專案，與 OpenAI、ChatGPT、video-use、HyperFrames、ElevenLabs、FFmpeg、Pillow 或 Adobe 的開發者及所屬公司沒有從屬、授權、背書或合作關係。產品名稱與商標屬各自權利人所有。

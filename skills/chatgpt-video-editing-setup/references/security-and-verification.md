@@ -93,6 +93,7 @@ Report observations, not assumptions:
 | --- | --- |
 | video-use source | stable path, origin URL, clean Git status, helpers directory |
 | runtime | paths or versions for Python/uv, FFmpeg, and ffprobe |
+| subtitle font | `SourceHanSansTW-Regular.otf` and `SourceHanSansTW-Bold.otf` present as regular files in the platform font directory, `OTTO` magic verified, and the `fc-list` match where fontconfig exists |
 | video-use registration | agent Skills path and symlink target, if one was approved |
 | credential | source present and `.env` mode/ignore check, without value |
 | HyperFrames, if explicitly approved and installed | stable path, exact official origin URL, clean status, Node.js 22+, lockfile, installed Core Skills outcome |

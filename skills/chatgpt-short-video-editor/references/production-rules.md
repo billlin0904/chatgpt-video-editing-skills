@@ -21,6 +21,9 @@
   is optional and only follows an approved HTML, CSS, or GSAP animation plan.
 - Build `master.srt` using output-timeline offsets:
   `output_time = word.start - segment_start + segment_offset`.
+- Burn subtitles with the installed Source Han Sans TW font. If the font is
+  missing or fails verification, stop and hand off to the setup Skill; do not
+  silently substitute another font or accept missing-glyph boxes.
 - Apply subtitles last, after all overlays and cards, so they remain visible.
 - Keep source audio intelligible; preserve approved music and effects only.
 

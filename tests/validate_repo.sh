@@ -83,6 +83,7 @@ require_phrase "FFmpeg"
 require_phrase "ffprobe"
 require_phrase "Pillow"
 require_phrase "HyperFrames"
+require_phrase "Source Han Sans TW"
 require_phrase "素材檢查、逐字轉寫、內容整理、剪輯決策、逐段粗剪、轉色／圖卡／字幕、混音與完整預覽、QA 與正式定稿"
 require_phrase "30–200ms"
 require_phrase "30ms"
@@ -116,12 +117,18 @@ for file in "$SETUP_RUNBOOK" "$FULL_PROMPT"; do
   require_file_phrase "$file" '[ "$actual_origin" = "$expected_origin" ] ||'
   require_file_phrase "$file" 'node_major=$(node -p'
   require_file_phrase "$file" '[ "$node_major" -ge 22 ] ||'
+  require_file_phrase "$file" 'https://github.com/adobe-fonts/source-han-sans/raw/release/SubsetOTF/TW'
+  require_file_phrase "$file" 'SourceHanSansTW-Regular.otf'
+  require_file_phrase "$file" 'SourceHanSansTW-Bold.otf'
+  require_file_phrase "$file" '[ "$magic" = 4f54544f ] ||'
 done
 
 require_file_phrase "$SETUP_RUNBOOK" 'HyperFrames 未要求'
 require_file_phrase "$SETUP_RUNBOOK" 'if [ "$hyperframes_approved" = yes ] && [ "$hyperframes_installed" = yes ]; then'
 require_file_phrase "$FULL_PROMPT" 'HyperFrames 未要求'
 require_file_phrase "README.md" 'Node.js 22 或更新版本'
+require_file_phrase "README.md" '思源黑體'
+require_file_phrase "THIRD_PARTY_NOTICE.md" 'SIL Open Font License 1.1'
 
 reject_file_phrase "$SETUP_RUNBOOK" '[ -d "$repo/.git" ]'
 reject_file_phrase "$FULL_PROMPT" '[ -d "$repo/.git" ]'

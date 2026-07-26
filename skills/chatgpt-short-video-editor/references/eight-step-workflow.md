@@ -50,7 +50,9 @@ ambiguous cuts with a source timeline view before committing them.
 Apply only approved colour changes, cards, or animation. Build simple cards as
 static Pillow images. Use HyperFrames only when the approved strategy needs an
 HTML, CSS, or GSAP animation and its environment is ready. Generate subtitles
-from the EDL on the output timeline and apply them last.
+from the EDL on the output timeline and apply them last. Burn subtitles with
+the installed Source Han Sans TW font; if it is missing, stop and hand off to
+the setup Skill instead of silently substituting another font.
 
 ## 7. 混音與完整預覽
 
