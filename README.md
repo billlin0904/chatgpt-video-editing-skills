@@ -2,16 +2,17 @@
 
 一組給可操作本機檔案與終端機的 AI Agent 使用的繁體中文 Skills，協助你安全地準備剪輯環境，並把自己提供的影片製作成直式短影音。
 
-這個套件把「環境安裝／檢查」和「實際剪輯」拆成兩個 Skill。它會保護原始素材、在付費或上傳前取得同意，並以實際輸出與 QA 證據為準，不把計畫、指令或未驗證的檔案說成完成品。
+這個套件把「環境安裝／檢查」、「字幕準備」和「實際剪輯」分成獨立 Skill。它會保護原始素材、在付費或上傳前取得同意，並以實際輸出與 QA 證據為準，不把計畫、指令或未驗證的檔案說成完成品。
 
 ![ChatGPT 剪短影音的八大步驟](assets/ChatGPT剪短影音的八大步驟.png)
 
-## 兩個 Skills 的分工
+## Skills 的分工
 
 | Skill | 用途 | 不會做的事 |
 | --- | --- | --- |
 | [`chatgpt-video-editing-setup`](skills/chatgpt-video-editing-setup/SKILL.md) | 檢查、安裝、修復或驗證 video-use、FFmpeg、ffprobe、思源黑體 TW 字幕字體、ElevenLabs 憑證與選用的 HyperFrames 環境 | 不上傳素材、不轉寫、不剪輯、不輸出影片 |
 | [`chatgpt-short-video-editor`](skills/chatgpt-short-video-editor/SKILL.md) | 對使用者提供的影片執行逐字轉寫、剪輯策略、粗剪、字幕、預覽、QA 與正式輸出 | 不會靜默安裝工具，也不會在預覽核准前輸出正式定稿 |
+| [`puretext-video-subtitles`](skills/puretext-video-subtitles/SKILL.md) | 透過 PureText 為使用者提供的影音建立可編輯字幕、翻譯、名詞索引與 SRT／VTT／JSON 匯出，供剪輯流程使用 | 不下載 YouTube、不決定剪輯點、不渲染或發布影片 |
 
 ## 安裝
 
@@ -20,7 +21,7 @@
 在你的專案目錄執行：
 
 ```sh
-npx skills add Jaycheng1103/chatgpt-video-editing-skills --full-depth
+npx skills add billlin0904/chatgpt-video-editing-skills --full-depth
 ```
 
 安裝器會讓你選擇要安裝的 Skills 與偵測到的 Agent。
@@ -28,7 +29,7 @@ npx skills add Jaycheng1103/chatgpt-video-editing-skills --full-depth
 若你確定要一次選取這個 Repo 內的所有 Skills，並安裝到所有偵測到的 Agent，可執行：
 
 ```sh
-npx skills add Jaycheng1103/chatgpt-video-editing-skills --all --full-depth
+npx skills add billlin0904/chatgpt-video-editing-skills --all --full-depth
 ```
 
 `--all` 會同時選取「全部 Skills」與「全部偵測到的 Agent」，請先確認這正是你想要的範圍。
@@ -38,19 +39,25 @@ npx skills add Jaycheng1103/chatgpt-video-editing-skills --all --full-depth
 只安裝環境設定 Skill：
 
 ```sh
-npx skills add Jaycheng1103/chatgpt-video-editing-skills --skill chatgpt-video-editing-setup --full-depth
+npx skills add billlin0904/chatgpt-video-editing-skills --skill chatgpt-video-editing-setup --full-depth
 ```
 
 只安裝剪輯 Skill：
 
 ```sh
-npx skills add Jaycheng1103/chatgpt-video-editing-skills --skill chatgpt-short-video-editor --full-depth
+npx skills add billlin0904/chatgpt-video-editing-skills --skill chatgpt-short-video-editor --full-depth
+```
+
+只安裝 PureText 字幕 Skill：
+
+```sh
+npx skills add billlin0904/chatgpt-video-editing-skills --skill puretext-video-subtitles --full-depth
 ```
 
 ### 手動 Clone 後從本機安裝
 
 ```sh
-git clone https://github.com/Jaycheng1103/chatgpt-video-editing-skills.git
+git clone https://github.com/billlin0904/chatgpt-video-editing-skills.git
 cd chatgpt-video-editing-skills
 npx skills add . --full-depth
 ```
@@ -81,6 +88,7 @@ npx skills remove chatgpt-video-editing-setup chatgpt-short-video-editor
 - [video-use](https://github.com/browser-use/video-use) 完整 Repo；剪輯輔助程式位於其中，不能只保留一份 Skill 文件。
 - [思源黑體（Source Han Sans）](https://github.com/adobe-fonts/source-han-sans) TW 子集 OTF（Regular 與 Bold），供繁體中文字幕燒錄使用；採 SIL Open Font License 1.1 授權，Setup Skill 只從官方 Repo 的 `release` 分支下載。
 - [ElevenLabs Scribe v2](https://elevenlabs.io/docs/capabilities/speech-to-text) 憑證與可用額度，供完整精度流程取得 word-level 時間碼。
+- PureText 字幕能力需另外設定可撤銷的 Agent API Token 與相容 CLI 或 Agent API；未設定時，`puretext-video-subtitles` 只會停在本機檢查，不會嘗試重用瀏覽器登入資訊。
 - [Pillow](https://python-pillow.github.io/) 用於簡單靜態資訊卡。
 - [HyperFrames](https://github.com/heygen-com/hyperframes) 僅在已核准的策略需要 HTML、CSS 或 GSAP 動畫時才是選用需求；若選用，必須有 Node.js 22 或更新版本與 Bun。未選用時，不要求 Node.js、HyperFrames Repo、`bun.lock` 或其 Core Skills。
 
@@ -96,12 +104,16 @@ npx skills remove chatgpt-video-editing-setup chatgpt-short-video-editor
 
 > 請使用 `chatgpt-short-video-editor`，把 `/完整/路徑/原始影片.mov` 剪成 60–90 秒、9:16 的繁體中文 Reels。先完成素材檢查、逐字轉寫與內容整理，再用 4–8 句提出剪輯策略，等我確認後才開始剪。
 
+若要先用 PureText 建立可剪輯字幕：
+
+> 請使用 `puretext-video-subtitles` 為 `/完整/路徑/原始影片.mov` 建立英文原文與繁體中文字幕。先顯示預估分鐘與用量，取得我的確認後才建立工作；完成後保留 word timestamps 與字幕文件，交給剪輯流程使用。
+
 若想一次提供完整規格，可直接複製 [`examples/完整提示詞.md`](examples/完整提示詞.md)。
 
 ## 八大步驟
 
 1. 素材檢查：用 `ffprobe` 確認來源規格與可解碼性，原始影片保持不變。
-2. 逐字轉寫：先取得檔案層級的上傳同意，再以 ElevenLabs Scribe v2 取得 word-level 時間碼。
+2. 逐字轉寫：先取得檔案層級的上傳同意，再以 ElevenLabs Scribe v2 或已驗證的 PureText 字幕文件取得 word-level 時間碼。
 3. 內容整理：找出 Hook、核心主線、可刪內容與待確認資訊。
 4. 剪輯決策：先提出 4–8 句白話策略，取得核准後才決定剪接點與創意元素。
 5. 逐段粗剪：依完整字詞邊界建立 EDL，保留 30–200ms 邊界空間與約 30ms 音訊淡入淡出。

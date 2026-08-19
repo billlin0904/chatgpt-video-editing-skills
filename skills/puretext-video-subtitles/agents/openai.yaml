@@ -1,0 +1,4 @@
+interface:
+  display_name: "PureText Video Subtitles"
+  short_description: "Create editable timed subtitles through PureText."
+  default_prompt: "Use $puretext-video-subtitles to prepare editable subtitles for my video."
