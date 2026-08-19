@@ -10,7 +10,7 @@
 
 | Skill | 用途 | 不會做的事 |
 | --- | --- | --- |
-| [`chatgpt-video-editing-setup`](skills/chatgpt-video-editing-setup/SKILL.md) | 檢查、安裝、修復或驗證 video-use、FFmpeg、ffprobe、思源黑體 TW 字幕字體、ElevenLabs 憑證與選用的 HyperFrames 環境 | 不上傳素材、不轉寫、不剪輯、不輸出影片 |
+| [`chatgpt-video-editing-setup`](skills/chatgpt-video-editing-setup/SKILL.md) | 檢查、安裝、修復或驗證 video-use、FFmpeg、ffprobe、思源黑體 TW 字幕字體、PureText Agent API 環境與選用的 HyperFrames 環境 | 不上傳素材、不轉寫、不剪輯、不輸出影片 |
 | [`chatgpt-short-video-editor`](skills/chatgpt-short-video-editor/SKILL.md) | 對使用者提供的影片執行逐字轉寫、剪輯策略、粗剪、字幕、預覽、QA 與正式輸出 | 不會靜默安裝工具，也不會在預覽核准前輸出正式定稿 |
 | [`puretext-video-subtitles`](skills/puretext-video-subtitles/SKILL.md) | 透過 PureText 為使用者提供的影音建立可編輯字幕、翻譯、名詞索引與 SRT／VTT／JSON 匯出，供剪輯流程使用 | 不下載 YouTube、不決定剪輯點、不渲染或發布影片 |
 
@@ -87,8 +87,7 @@ npx skills remove chatgpt-video-editing-setup chatgpt-short-video-editor
 - [FFmpeg](https://ffmpeg.org/) 與 `ffprobe`。
 - [video-use](https://github.com/browser-use/video-use) 完整 Repo；剪輯輔助程式位於其中，不能只保留一份 Skill 文件。
 - [思源黑體（Source Han Sans）](https://github.com/adobe-fonts/source-han-sans) TW 子集 OTF（Regular 與 Bold），供繁體中文字幕燒錄使用；採 SIL Open Font License 1.1 授權，Setup Skill 只從官方 Repo 的 `release` 分支下載。
-- [ElevenLabs Scribe v2](https://elevenlabs.io/docs/capabilities/speech-to-text) 憑證與可用額度，供完整精度流程取得 word-level 時間碼。
-- PureText 字幕能力需另外設定可撤銷的 Agent API Token 與相容 CLI 或 Agent API；未設定時，`puretext-video-subtitles` 只會停在本機檢查，不會嘗試重用瀏覽器登入資訊。
+- PureText Agent API 的可撤銷 Token 與可用額度，供完整精度流程取得 word-level 時間碼。設定 `PURETEXT_API_BASE_URL` 與 `PURETEXT_AGENT_TOKEN`；未設定時，`puretext-video-subtitles` 只會停在本機檢查，不會嘗試重用瀏覽器登入資訊。
 - [Pillow](https://python-pillow.github.io/) 用於簡單靜態資訊卡。
 - [HyperFrames](https://github.com/heygen-com/hyperframes) 僅在已核准的策略需要 HTML、CSS 或 GSAP 動畫時才是選用需求；若選用，必須有 Node.js 22 或更新版本與 Bun。未選用時，不要求 Node.js、HyperFrames Repo、`bun.lock` 或其 Core Skills。
 
@@ -113,7 +112,7 @@ npx skills remove chatgpt-video-editing-setup chatgpt-short-video-editor
 ## 八大步驟
 
 1. 素材檢查：用 `ffprobe` 確認來源規格與可解碼性，原始影片保持不變。
-2. 逐字轉寫：先取得檔案層級的上傳同意，再以 ElevenLabs Scribe v2 或已驗證的 PureText 字幕文件取得 word-level 時間碼。
+2. 逐字轉寫：先取得檔案層級的上傳同意，再以 PureText Agent API 取得或讀取已驗證的 word-level 字幕文件。
 3. 內容整理：找出 Hook、核心主線、可刪內容與待確認資訊。
 4. 剪輯決策：先提出 4–8 句白話策略，取得核准後才決定剪接點與創意元素。
 5. 逐段粗剪：依完整字詞邊界建立 EDL，保留 30–200ms 邊界空間與約 30ms 音訊淡入淡出。
@@ -126,10 +125,10 @@ npx skills remove chatgpt-video-editing-setup chatgpt-short-video-editor
 ## 隱私、憑證與費用
 
 - 不要把 API Key 貼進聊天、命令列參數、公開檔案、Git commit、shell history 或 log。
-- `ELEVENLABS_API_KEY` 只能由本機環境變數，或受保護的 `~/Developer/video-use/.env` 提供。
-- 使用 `.env` 前，Agent 必須先確認 Git 會忽略它；本機檔案權限應為 `600`。Agent 不應讀取或顯示檔案內容。
-- 第一次把媒體傳給 ElevenLabs 前，Agent 必須說明具體檔名、用途是 Scribe v2 轉寫，以及可能消耗額度或產生費用，並等待你的明確同意。
-- 若你不願上傳雲端，可明確選擇本機 Whisper 降級方案；它的時間碼信心較低，需要對每個剪接邊界做額外播放檢查，不能說成與 Scribe v2 同等精準。
+- `PURETEXT_API_BASE_URL` 與 `PURETEXT_AGENT_TOKEN` 只能由本機環境變數提供；不可寫入聊天、命令列參數、公開檔案、Git commit、shell history 或 log。
+- Agent 不得讀取、顯示或推測 Token 值，也不可改用瀏覽器登入 Cookie、Google Session 或其他使用者憑證。
+- 第一次把媒體傳給 PureText Agent API 前，Agent 必須說明具體檔名、用途是取得逐字時間碼、預估分鐘數與可能消耗額度或產生費用，並等待你的明確同意。
+- 若你不願上傳雲端，可明確選擇本機 Whisper 降級方案；它的時間碼信心較低，需要對每個剪接邊界做額外播放檢查，不能說成與 PureText 的已驗證 word-level 時間碼同等精準。
 
 詳細安全規則見 [`security-and-verification.md`](skills/chatgpt-video-editing-setup/references/security-and-verification.md)。
 
@@ -159,9 +158,9 @@ edit/
 
 請改用 `chatgpt-video-editing-setup`。它會先檢查，再列出需要你核准的變更。若既有 Repo 有未提交修改，它會停下來，不會直接 pull、reset 或覆寫；既有字體檔也不會被重新下載或覆寫。
 
-### 沒有 ElevenLabs 額度，或不想上傳素材
+### 沒有 PureText 額度，或不想上傳素材
 
-完整精度流程以 Scribe v2 為主。你可以明確要求使用本機 Whisper 降級方案，但要接受較低信心的時間碼與額外邊界 QA；Agent 不應默默切換。
+完整精度流程以 PureText Agent API 為主。你可以明確要求使用本機 Whisper 降級方案，但要接受較低信心的時間碼與額外邊界 QA；Agent 不應默默切換。
 
 ### 已經看到指令、轉寫文字或預覽，為什麼還沒算完成？
 
@@ -177,4 +176,4 @@ edit/
 
 本專案以 [MIT License](LICENSE) 發布。歡迎先閱讀 [`CONTRIBUTING.md`](CONTRIBUTING.md) 與 [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) 再參與貢獻。
 
-這是社群維護的非官方專案，與 OpenAI、ChatGPT、video-use、HyperFrames、ElevenLabs、FFmpeg、Pillow 或 Adobe 的開發者及所屬公司沒有從屬、授權、背書或合作關係。產品名稱與商標屬各自權利人所有。
+這是社群維護的非官方專案，與 OpenAI、ChatGPT、video-use、HyperFrames、PureText、FFmpeg、Pillow 或 Adobe 的開發者及所屬公司沒有從屬、授權、背書或合作關係。產品名稱與商標屬各自權利人所有。

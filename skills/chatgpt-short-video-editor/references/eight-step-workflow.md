@@ -12,27 +12,27 @@ vertical target. Create the adjacent `edit/` workspace only after this check.
 ## 2. 逐字轉寫
 
 Cache a word-level verbatim transcript under `edit/transcripts/`, keyed to the
-unchanged source. ElevenLabs Scribe v2 remains the default full-precision path.
-Alternatively, accept a document produced by `puretext-video-subtitles` when it
-contains the original segments, source identity, and verified word timestamps.
+unchanged source. A document produced by `puretext-video-subtitles` is the
+default full-precision path when it contains the original segments, source
+identity, and verified word timestamps.
 Preserve that PureText export unmodified as
 `edit/transcripts/<source>.puretext.json`; use its original segments for edit
 boundaries and its display cues only for rendered subtitle presentation.
 
-Before a first upload to either provider, obtain the file-specific consent
+Before a first upload to PureText, obtain the file-specific consent
 described in the Skill. Do not replace word timing with phrase-only subtitles.
 If a PureText document has no `words` layer, it can supply ordinary subtitles
 and content analysis, but not word-accurate EDL boundaries. State that limit
 and perform extra playback checks before any phrase-boundary cut.
 
-If the selected Scribe path is unavailable, hand off to setup first. If a
-verified PureText subtitle document is already available, it may be used
-instead without invoking Scribe. If neither path is available and the user
-declines cloud upload, do not silently switch: explain that a local Whisper
-fallback has lower-confidence timing, then ask whether the user explicitly
-wants it. When chosen, label its transcript lower-confidence and perform extra
-boundary playback checks at every EDL edge; never represent its timing as equal
-to Scribe or a verified word-level PureText document.
+If the PureText path is unavailable, hand off to setup first. If a verified
+PureText subtitle document is already available, use it without creating a new
+task. If no usable document is available and the user declines cloud upload, do
+not silently switch: explain that a local Whisper fallback has lower-confidence
+timing, then ask whether the user explicitly wants it. When chosen, label its
+transcript lower-confidence and perform extra boundary playback checks at every
+EDL edge; never represent its timing as equal to a verified word-level PureText
+document.
 
 ## 3. 內容整理
 

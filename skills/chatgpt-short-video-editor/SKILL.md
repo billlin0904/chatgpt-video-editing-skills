@@ -14,8 +14,7 @@ Skill starts only when a source file or clear source location is available.
    it. Put every new artifact beside the source in `<source-directory>/edit/`.
 2. Check that the installed `video-use` workflow, `FFmpeg`, `ffprobe`, and the
    chosen transcript path are available. The documented full-precision path
-   uses ElevenLabs Scribe v2; an existing verified document from
-   `puretext-video-subtitles` is an alternative. Do not install, clone, update,
+   uses a verified document from `puretext-video-subtitles`. Do not install, clone, update,
    or repair anything silently. If a dependency is missing, hand off to
    `chatgpt-video-editing-setup` and state what must be verified first.
 3. Before the first upload of a source file to any transcription provider, name
@@ -34,7 +33,7 @@ add B-roll, animations, music, effects, CTA, or a publishing schedule. Treat
 these as opt-in creative decisions, not defaults.
 
 Use a verified word-level verbatim transcript, cached per unchanged source.
-This may come from ElevenLabs Scribe v2 or `puretext-video-subtitles`. Never
+This may come from `puretext-video-subtitles`. Never
 cut inside a word. Keep 30–200ms padding around cut edges, work per segment,
 and use output-timeline subtitle timing. Subtitles are the last visual
 operation. If only phrase-level timings exist, do not claim word-accurate cuts.

@@ -1,6 +1,6 @@
 ---
 name: chatgpt-video-editing-setup
-description: "Set up, repair, or verify the local AI short-video environment: video-use, FFmpeg, the Source Han Sans TW subtitle font, ElevenLabs credentials, and optional HyperFrames skills. Use whenever a user asks to install, configure, fix, reconnect, or check this editing environment. Do not use for Premiere or CapCut help, or to edit/transcribe media; hand those requests to the editing workflow after setup is verified."
+description: "Set up, repair, or verify the local AI short-video environment: video-use, FFmpeg, the Source Han Sans TW subtitle font, PureText Agent API environment variables, and optional HyperFrames skills. Use whenever a user asks to install, configure, fix, reconnect, or check this editing environment. Do not use for Premiere or CapCut help, or to edit/transcribe media; hand those requests to the editing workflow after setup is verified."
 ---
 
 # ChatGPT Video Editing Setup
@@ -40,9 +40,9 @@ before handling credentials or declaring anything ready.
    official Adobe Fonts repository, never overwriting an existing font file.
    Treat HyperFrames as optional unless the user specifically needs HTML, CSS,
    or GSAP animation; when requested, require Node.js 22 or newer.
-5. Configure ElevenLabs only through an existing environment variable or the
-   protected `~/Developer/video-use/.env` path. Never echo, log, or commit a
-   credential.
+5. Configure PureText only through the existing `PURETEXT_API_BASE_URL` and
+   `PURETEXT_AGENT_TOKEN` process environment variables. Never echo, log, or
+   commit a credential.
 6. Verify with local, no-paid-work checks only, including the subtitle font
    files. Run HyperFrames repository, Node, lockfile, and Core Skills checks
    only if HyperFrames was explicitly approved and installed; otherwise report
@@ -54,7 +54,7 @@ before handling credentials or declaring anything ready.
 
 ## Handoff boundary
 
-Before any later first media upload to ElevenLabs, identify the source file,
-state that it will be uploaded for transcription with ElevenLabs Scribe v2, note
-that account quota or charges may apply, and obtain consent. Setup itself ends
-before that point.
+Before any later first media upload to PureText, identify the source file,
+state that it will be uploaded for word-level transcription, report the estimated
+minutes and that account quota or charges may apply, and obtain consent. Setup
+itself ends before that point.

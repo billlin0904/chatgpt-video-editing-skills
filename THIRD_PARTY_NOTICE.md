@@ -5,7 +5,7 @@
 - [video-use](https://github.com/browser-use/video-use) — [MIT License](https://github.com/browser-use/video-use/blob/main/LICENSE)
 - [HyperFrames](https://github.com/heygen-com/hyperframes) — [Apache License 2.0](https://github.com/heygen-com/hyperframes/blob/main/LICENSE)
 - [思源黑體 Source Han Sans](https://github.com/adobe-fonts/source-han-sans) — [SIL Open Font License 1.1](https://github.com/adobe-fonts/source-han-sans/blob/release/LICENSE.txt)
-- [ElevenLabs API 文件](https://elevenlabs.io/docs/api-reference/introduction) 與 [服務條款](https://elevenlabs.io/terms-of-use)
+- PureText Agent API — 由使用者自行部署或授權的端點；請依其服務條款與隱私政策使用
 - [FFmpeg](https://ffmpeg.org/) — [FFmpeg Legal／License](https://ffmpeg.org/legal.html)
 - [Pillow](https://python-pillow.github.io/) — [Pillow License](https://github.com/python-pillow/Pillow/blob/main/LICENSE)
 
